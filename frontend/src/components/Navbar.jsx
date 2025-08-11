@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  MapPin, ChevronDown, Plus, Percent, Bell, Heart, MessageCircle, FileText, BriefcaseBusiness, Package, User
+  MapPin, ChevronDown, Plus, Percent, Bell, Heart, MessageCircle, FileText, BriefcaseBusiness, Package
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuthStore } from '../store/authStore';
 import chirag6 from '../assets/chirag6.png';
 import logo from '../assets/chiraglogo.jpg';
 
@@ -13,10 +14,14 @@ const NavItem = ({ icon: Icon, label }) => (
   </div>
 );
 
+const getInitial = (name) => (name?.trim()?.[0] || '?').toUpperCase();
+
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const nav = useNavigate();
   const menuRef = useRef(null);
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
 
   useEffect(() => {
     const onDoc = (e) => {
@@ -67,37 +72,51 @@ export default function Navbar() {
           <NavItem icon={BriefcaseBusiness} label="Career" />
         </div>
 
-        {/* Right side: bell + avatar */}
+        {/* Right side: bell + avatar/login */}
         <div className="flex items-center gap-4" ref={menuRef}>
           <button title="Notifications" aria-label="notifications" className="text-gray-700 hover:text-blue-700">
             <Bell size={20} />
           </button>
 
-          {/* Avatar with dropdown */}
-          <div className="relative">
+          {/* If not logged in, show Login button */}
+          {!user && (
             <button
-              className="w-9 h-9 rounded-full overflow-hidden border"
-              onClick={() => setOpen((v) => !v)}
-              aria-haspopup="menu"
-              aria-expanded={open}
+              id="login"
+              className="px-4 cursor-pointer py-2 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
+              onClick={() => nav('/auth')}
             >
-              <img src={chirag6} alt="profile" className="w-full h-full object-cover" />
+              Login
             </button>
+          )}
 
-            {open && (
-              <div className="absolute right-0 mt-2 w-40 rounded-lg border bg-white shadow-md py-1 z-50">
-                <button
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
-                  onClick={() => { setOpen(false); nav('/auth'); }}
-                >
-                  Login
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50" disabled>
-                  Profile
-                </button>
-              </div>
-            )}
-          </div>
+          {/* If logged in, show initial avatar with dropdown */}
+          {user && (
+            <div className="relative">
+              <button
+                className="w-9 h-9 rounded-full overflow-hidden border bg-blue-600 text-white grid place-content-center font-semibold"
+                onClick={() => setOpen((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={open}
+                title={user?.name || 'Profile'}
+              >
+                {getInitial(user?.name)}
+              </button>
+
+              {open && (
+                <div className="absolute right-0 mt-2 w-44 rounded-lg border bg-white shadow-md py-1 z-50">
+                  <button className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50" disabled>
+                    Profile
+                  </button>
+                  <button
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                    onClick={() => { logout(); setOpen(false); }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </header>
