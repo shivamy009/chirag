@@ -10,6 +10,11 @@ export const listProducts = async () => {
   return res.data;
 };
 
+export const getProductById = async (id) => {
+  const res = await api.get(`/api/products/${id}`);
+  return res.data;
+};
+
 export const updateProduct = async (id, data) => {
   const res = await api.put(`/api/products/${id}`, data);
   return res.data;

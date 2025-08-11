@@ -7,12 +7,14 @@ import ProfileLayout from './pages/profile/ProfileLayout'
 import Dashboard from './pages/profile/Dashboard'
 import AddProduct from './pages/profile/AddProduct'
 import ManageProducts from './pages/profile/ManageProducts'
+import ProductDetails from './pages/ProductDetails'
 
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
+  <Route path="/products/:id" element={<ProductDetails />} />
 
       <Route
         path="/profile"

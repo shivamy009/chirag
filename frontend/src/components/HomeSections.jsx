@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ProductCard from './ProductCard';
 import SectionTabs from './SectionTabs';
+import { listProducts } from '../api/products';
+import SkeletonCard from './SkeletonCard';
 
 // images
 import car1 from '../assets/chiragcar1.png';
@@ -22,30 +25,81 @@ import rec6 from '../assets/chiragrec6.jpg';
 import rec7 from '../assets/chiragrec7.jpg';
 import rec8 from '../assets/chiragrec8.jpg';
 
-const cars = [car1, car2, car3, car4];
+const carsFallback = [car1, car2, car3, car4];
 const bikes = [bike1, bike2, bike3, bike4];
 const recs = [rec1, rec2, rec3, rec4, rec5, rec6, rec7, rec8];
 
 export default function HomeSections() {
+  const [cars, setCars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+  const data = await listProducts();
+        if (!mounted) return;
+  setCars(data || []);
+      } catch (e) {
+        setCars([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
   return (
     <div className="space-y-8 mt-6">
       {/* Newly listed cars */}
-      <section>
+  <section className="relative">
         <h3 className="heading-32 mb-2">Newly listed cars</h3>
         <SectionTabs tabs={[
           'Mahindra & Mahindra', 'Tata Motors', 'Maruti Suzuki', 'Hyundai', 'Honda', 'Toyota'
         ]} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {cars.map((img, i) => (
-            <ProductCard
-              key={i}
-              image={img}
-              price="$ 3,75,000"
-              subtitle="2014 • 70,000km"
-              meta="Eco: 82/100"
-              footer="Bengaluru · Today"
-            />
+
+        {/* Scroll buttons */}
+    <div className="hidden md:block">
+          <button
+            aria-label="Scroll left"
+            onClick={() => scrollRef.current?.scrollBy({ left: -(scrollRef.current?.clientWidth || 300) * 0.9, behavior: 'smooth' })}
+      className="absolute -left-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 grid place-content-center rounded-full border bg-white text-gray-700 shadow hover:bg-blue-600 hover:text-white cursor-pointer"
+          >
+      <ChevronLeft size={16} />
+          </button>
+          <button
+            aria-label="Scroll right"
+            onClick={() => scrollRef.current?.scrollBy({ left: (scrollRef.current?.clientWidth || 300) * 0.9, behavior: 'smooth' })}
+      className="absolute -right-3 top-1/2 -translate-y-1/2 z-10 w-9 h-9 grid place-content-center rounded-full border bg-white text-gray-700 shadow hover:bg-blue-600 hover:text-white cursor-pointer"
+          >
+      <ChevronRight size={16} />
+          </button>
+        </div>
+
+        {/* Horizontal list */}
+  <div ref={scrollRef} className="flex gap-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar pb-2 pr-2">
+          {loading && Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="snap-start shrink-0 w-64 sm:w-72">
+              <SkeletonCard />
+            </div>
           ))}
+          {!loading && cars.map((p) => {
+            const priceNumber = typeof p.price === 'number' ? p.price : Number(String(p.price).replace(/[^0-9.]/g, ''));
+            const priceText = isNaN(priceNumber) ? (p.price ?? '') : priceNumber.toLocaleString('en-IN');
+            return (
+            <div key={p._id} className="snap-start shrink-0 w-64 sm:w-72">
+              <ProductCard
+                image={p.images || carsFallback[0]}
+                price={`$ ${priceText}`}
+                subtitle={p.description?.slice(0, 32) || '—'}
+                meta={p.ecoScore ? `Eco: ${p.ecoScore}/100` : 'Eco: 82/100'}
+                footer={`Bengaluru · Today`}
+                to={`/products/${p._id}`}
+              />
+            </div>
+            );
+          })}
         </div>
       </section>
 
@@ -62,7 +116,7 @@ export default function HomeSections() {
               image={img}
               price={i % 2 ? '$ 35,000' : '$ 86,000'}
               subtitle={i % 2 ? '2016 • 20,000km' : '2016 • 20,000km'}
-              meta="Eco: 82/100"
+              meta={"Eco: 82/100"}
               footer="Bengaluru · Today"
             />
           ))}
@@ -81,7 +135,7 @@ export default function HomeSections() {
               subtitle={[
                 'Best quality','Data refrigerator','New unused','100% Cotton','Best quality','Best quality','MacBook Air','A wooden chair for work'
               ][i]}
-              meta="Eco: 82/100"
+              meta={"Eco: 82/100"}
               footer="Bengaluru · Today"
             />
           ))}

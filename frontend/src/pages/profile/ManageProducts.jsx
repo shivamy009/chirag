@@ -12,6 +12,8 @@ export default function ManageProducts() {
   const [form, setForm] = useState({ name: '', price: '', description: '', category: '', images: '', keyFeatures: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 4;
 
   const load = async () => {
     setLoading(true);
@@ -26,6 +28,12 @@ export default function ManageProducts() {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Keep page in range when items change (e.g., after delete)
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+    if (page > totalPages) setPage(totalPages);
+  }, [items]);
 
   const openEdit = (p) => {
     setEditing(p);
@@ -93,6 +101,12 @@ export default function ManageProducts() {
     }
   };
 
+  const total = items.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const startIdx = (page - 1) * pageSize;
+  const endIdx = Math.min(startIdx + pageSize, total);
+  const pageItems = items.slice(startIdx, endIdx);
+
   return (
     <div className="bg-white rounded-xl border p-6">
       <h2 className="heading-32 mb-4">Manage Products</h2>
@@ -101,7 +115,7 @@ export default function ManageProducts() {
       ) : (
         <div className="grid gap-3">
           {items.length === 0 && <div className="text-sm text-gray-500">No products yet.</div>}
-          {items.map((p) => (
+          {pageItems.map((p) => (
             <div key={p._id} className="flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 border rounded-lg p-3">
               <img src={p.images || 'https://via.placeholder.com/64'} alt={p.name} className="w-16 h-16 object-cover rounded self-start sm:self-auto" />
               <div className="flex-1 w-full">
@@ -131,6 +145,31 @@ export default function ManageProducts() {
               </div>
             </div>
           ))}
+          {/* Pagination controls */}
+          {items.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="text-sm text-gray-600">
+                Showing {total === 0 ? 0 : startIdx + 1}–{endIdx} of {total}
+              </div>
+              <div className="inline-flex items-center gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="px-3 py-1.5 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Prev
+                </button>
+                <span className="text-sm text-gray-600">Page {page} of {totalPages}</span>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="px-3 py-1.5 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

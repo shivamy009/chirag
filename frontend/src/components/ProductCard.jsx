@@ -1,11 +1,18 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Heart, MapPin } from 'lucide-react';
 
-export default function ProductCard({ image, price, subtitle, meta, footer }) {
+export default function ProductCard({ image, price, subtitle, meta, footer, to }) {
   const [leftFooter, rightFooter] = (footer || '').split('·').map(s => s?.trim());
 
+  const Wrapper = to ? Link : 'div';
+  const wrapperProps = to ? { to } : {};
+
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition">
+    <Wrapper
+      {...wrapperProps}
+      className="block rounded-2xl border border-gray-200 bg-white p-2.5 shadow-sm hover:shadow-md transition-shadow no-underline focus:outline-none focus:ring-0"
+    >
       <div className="relative h-36 md:h-40 rounded-lg overflow-hidden bg-gray-100">
         <img src={image} alt="item" className="w-full h-full object-cover" />
         <button className="absolute top-2 right-2 w-8 h-8 grid place-content-center rounded-full bg-white/95 border shadow">
@@ -16,7 +23,7 @@ export default function ProductCard({ image, price, subtitle, meta, footer }) {
       <div className="mt-2.5 space-y-1">
         {/* Price + Eco */}
         <div className="flex items-center justify-between">
-          <div className="font-extrabold text-[15px]">{price}</div>
+          <div className="font-extrabold text-[15px] text-gray-900">{price}</div>
           <div className="text-[11px] text-gray-600">{meta}</div>
         </div>
 
@@ -32,6 +39,6 @@ export default function ProductCard({ image, price, subtitle, meta, footer }) {
           <span>{rightFooter}</span>
         </div>
       </div>
-    </div>
+  </Wrapper>
   );
 }
