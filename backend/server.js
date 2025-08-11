@@ -8,7 +8,7 @@ import productRoutes from './routes/productRoutes.js';
 dotenv.config();
 
 const app = express();
-const proorigin = process.env.PRO_ORIGIN;
+const proorigin = process.env.CLIENT_ORIGIN;
 
 // Middleware
 app.use(cors({ origin: [proorigin, 'http://localhost:5173'], credentials: true }));
