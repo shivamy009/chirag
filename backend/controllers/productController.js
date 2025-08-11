@@ -3,12 +3,19 @@ import Product from '../models/Product.js';
 // Create a product
 export const createProduct = async (req, res) => {
   try {
-    const { name, price, description, category, images } = req.body;
+    const { name, price, description, category, images, keyFeatures } = req.body;
     if (!name || price == null) {
       return res.status(400).json({ message: 'Name and price are required' });
     }
 
-    const product = await Product.create({ name, price, description, category, images });
+    const product = await Product.create({
+      name,
+      price,
+      description,
+      category,
+      images,
+      keyFeatures: Array.isArray(keyFeatures) ? keyFeatures : (typeof keyFeatures === 'string' && keyFeatures.trim() ? keyFeatures.split('\n').map(s=>s.trim()).filter(Boolean) : []),
+    });
     return res.status(201).json(product);
   } catch (err) {
     console.error('Create product error', err);
@@ -42,10 +49,17 @@ export const getProductById = async (req, res) => {
 // Update product by id
 export const updateProduct = async (req, res) => {
   try {
-    const { name, price, description, category, images } = req.body;
+    const { name, price, description, category, images, keyFeatures } = req.body;
     const updated = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, price, description, category, images },
+      {
+        name,
+        price,
+        description,
+        category,
+        images,
+        keyFeatures: Array.isArray(keyFeatures) ? keyFeatures : (typeof keyFeatures === 'string' && keyFeatures.trim() ? keyFeatures.split('\n').map(s=>s.trim()).filter(Boolean) : []),
+      },
       { new: true, runValidators: true }
     );
     if (!updated) return res.status(404).json({ message: 'Product not found' });
