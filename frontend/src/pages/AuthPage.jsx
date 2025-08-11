@@ -19,6 +19,15 @@ export default function AuthPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
+    // Basic client-side validations
+    if (!form.email || !form.password || (mode === 'signup' && !form.name)) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+    if (form.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
     setLoading(true);
     try {
       const action = mode === 'signup' ? apiSignup : apiLogin;

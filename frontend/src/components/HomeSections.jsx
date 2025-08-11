@@ -32,16 +32,20 @@ const recs = [rec1, rec2, rec3, rec4, rec5, rec6, rec7, rec8];
 export default function HomeSections() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const scrollRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-  const data = await listProducts();
+        setError(false);
+        const data = await listProducts();
         if (!mounted) return;
-  setCars(data || []);
+        const arr = Array.isArray(data) ? data : (Array.isArray(data?.products) ? data.products : []);
+        setCars(arr || []);
       } catch (e) {
+        setError(true);
         setCars([]);
       } finally {
         if (mounted) setLoading(false);
@@ -78,28 +82,45 @@ export default function HomeSections() {
         </div>
 
         {/* Horizontal list */}
-  <div ref={scrollRef} className="flex gap-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar pb-2 pr-2">
+        <div ref={scrollRef} className="flex gap-4 overflow-x-auto overflow-y-hidden snap-x snap-mandatory no-scrollbar pb-2 pr-2">
           {loading && Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="snap-start shrink-0 w-64 sm:w-72">
               <SkeletonCard />
             </div>
           ))}
-          {!loading && cars.map((p) => {
+
+          {/* Real data */}
+          {!loading && cars.length > 0 && cars.map((p) => {
             const priceNumber = typeof p.price === 'number' ? p.price : Number(String(p.price).replace(/[^0-9.]/g, ''));
             const priceText = isNaN(priceNumber) ? (p.price ?? '') : priceNumber.toLocaleString('en-IN');
             return (
-            <div key={p._id} className="snap-start shrink-0 w-64 sm:w-72">
-              <ProductCard
-                image={p.images || carsFallback[0]}
-                price={`$ ${priceText}`}
-                subtitle={p.description?.slice(0, 32) || '—'}
-                meta={p.ecoScore ? `Eco: ${p.ecoScore}/100` : 'Eco: 82/100'}
-                footer={`Bengaluru · Today`}
-                to={`/products/${p._id}`}
-              />
-            </div>
+              <div key={p._id} className="snap-start shrink-0 w-64 sm:w-72">
+                <ProductCard
+                  image={p.images || carsFallback[0]}
+                  price={`$ ${priceText}`}
+                  subtitle={p.description?.slice(0, 32) || '—'}
+                  meta={p.ecoScore ? `Eco: ${p.ecoScore}/100` : 'Eco: 82/100'}
+                  footer={`Bengaluru · Today`}
+                  to={`/products/${p._id}`}
+                />
+              </div>
             );
           })}
+
+          {/* Fallback demo cards if API returns empty or fails */}
+          {!loading && cars.length === 0 && (
+            carsFallback.concat(carsFallback).slice(0, 8).map((img, i) => (
+              <div key={`fb-${i}`} className="snap-start shrink-0 w-64 sm:w-72">
+                <ProductCard
+                  image={img}
+                  price={i % 2 ? '$ 3,50,000' : '$ 5,80,000'}
+                  subtitle={i % 2 ? '2017 • 28,000km' : '2019 • 18,500km'}
+                  meta={'Eco: 82/100'}
+                  footer="Demo · Today"
+                />
+              </div>
+            ))
+          )}
         </div>
       </section>
 
