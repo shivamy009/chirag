@@ -10,11 +10,11 @@ dotenv.config();
 const app = express();
 const proorigin = process.env.CLIENT_ORIGIN;
 
-// Middleware
+ 
 app.use(cors({ origin: [proorigin, 'http://localhost:5173'], credentials: true }));
 app.use(express.json());
 
-// Health check
+ 
 app.get('/', (req, res) => res.send('API is running'));
 
 // Routes

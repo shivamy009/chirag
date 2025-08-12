@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000',
-  timeout: 10000,
+  baseURL: import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 });
 
 // Attach JWT from persisted Zustand store if available

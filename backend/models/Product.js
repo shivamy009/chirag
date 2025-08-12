@@ -27,7 +27,6 @@ const productSchema = new mongoose.Schema(
       maxlength: 100,
     },
     images: {
-      // As requested: a single string. Could be a URL or comma-separated list.
       type: String,
       trim: true,
       default: '',
