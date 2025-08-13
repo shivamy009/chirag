@@ -42,8 +42,7 @@ const productSchema = new mongoose.Schema(
     },
   },
   {
-    // We keep custom created_at per requirement; don't enable automatic timestamps
-    // timestamps: true,
+ 
     versionKey: false,
   }
 );
